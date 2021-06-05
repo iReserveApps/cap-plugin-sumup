@@ -8,9 +8,7 @@ export declare class SumUpWeb extends WebPlugin implements SumUpPlugin {
         code: number;
         message: string;
     }>;
-    login(options: {
-        affiliateKey: string;
-    }): Promise<{
+    login(options: {}): Promise<{
         code: number;
         message: string;
     }>;

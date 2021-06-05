@@ -6,22 +6,16 @@ declare module '@capacitor/core' {
 export interface SumUpResponse {
     code: number;
     message: string;
+    transactionId?: string;
 }
 export interface CheckoutOptions {
     total: number;
     currency: string;
     title?: string;
-    receiptEmail?: string;
-    receiptSMS?: string;
-    additionalInfo?: {
-        [key: string]: string;
-    };
-    foreignTransactionId?: string;
-    skipSuccessScreen?: boolean;
+    transactionIdentifier?: string;
+    transactionIdPrefix?: string;
 }
 export interface LoginOptions {
-    affiliateKey: string;
-    accessToken?: string;
 }
 export interface SetupOptions {
     apiKey: string;
