@@ -11,29 +11,28 @@ public class SumUp: CAPPlugin {
         print("apiKey", apiKey)
         
         DispatchQueue.main.async {
-            let testresult = SumUpSDK.testIntegration()
-            print("testresult", testresult)
+            SumUpSDK.testIntegration()
             let setupResult = SumUpSDK.setup(withAPIKey: apiKey)
             print("setupResult", setupResult)
+
             call.success([
                 "code": setupResult, "message": apiKey
             ])
         }
     }
-    
+
     @objc func login(_ call: CAPPluginCall) {
         print("SUMUP:CAPPluginCall:login")
-        
+
         DispatchQueue.main.async {
-            let loginResult: Void = SumUpSDK.presentLogin(from: self.bridge.viewController, animated: true, completionBlock: nil)
-            print("loginResult", loginResult)
+            SumUpSDK.presentLogin(from: self.bridge.viewController, animated: true, completionBlock: nil)
         }
-        
+
         call.success([
             "code": 1, "message": "Login"
         ])
     }
-    
+
     @objc func checkout(_ call: CAPPluginCall) {
         print("SUMUP:CAPPluginCall:checkout")
         let total = call.getString("total") ?? "0"
@@ -50,7 +49,7 @@ public class SumUp: CAPPlugin {
             request.foreignTransactionID = transactionId
             print("request.foreignTransactionID", transactionId)
             let vc = self.bridge.viewController
-                        
+
             SumUpSDK.checkout(with: request, from: self.bridge.viewController) { [weak vc] (result: CheckoutResult?, error: Error?) in
                 if let safeError = error as NSError? {
                     print("SUMUP:CAPPluginCall:error during checkout: \(safeError)")
@@ -58,10 +57,14 @@ public class SumUp: CAPPlugin {
                     if (safeError.domain == SumUpSDKErrorDomain) && (safeError.code == SumUpSDKError.accountNotLoggedIn.rawValue) {
                         returnmessage = "not logged in"
                     } else {
-                        returnmessage = "general error"
+
+                        print("Start Log error to console=======")
+                        print(safeError.code)
+                        print(safeError.userInfo)
+                        print("End Log error to console=========")
+
+                        returnmessage = safeError.debugDescription
                     }
-                    let alert = UIAlertController(title: "Alert", message: returnmessage, preferredStyle: .alert)
-                    vc?.present(alert, animated: true, completion: nil)
                     call.reject(returnmessage)
                     return
                 }
@@ -85,8 +88,9 @@ public class SumUp: CAPPlugin {
                         let currencyCode = info["currency"] as? String {
                         returnmessage = returnmessage.appending("\ntip: \(tipAmount) \(currencyCode)")
                     }
+                    let transactionId = safeResult.transactionCode
                     call.success([
-                        "code": 1, "message": returnmessage
+                        "code": 1, "message": returnmessage, "transactionId":transactionId ?? ""
                     ])
                 } else {
                     print("SUMUP:CAPPluginCall:cancelled: no error, no success")
@@ -97,7 +101,6 @@ public class SumUp: CAPPlugin {
                     ])
                 }
             }
-            
         }
     }
 }
