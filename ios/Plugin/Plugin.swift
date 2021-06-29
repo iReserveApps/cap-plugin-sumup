@@ -23,14 +23,18 @@ public class SumUp: CAPPlugin {
 
     @objc func login(_ call: CAPPluginCall) {
         print("SUMUP:CAPPluginCall:login")
-
-        DispatchQueue.main.async {
-            SumUpSDK.presentLogin(from: self.bridge.viewController, animated: true, completionBlock: nil)
+        if (SumUpSDK.isLoggedIn) {
+            call.success([
+                "code": 1, "message": "Logged in"
+            ])
+        } else {
+            DispatchQueue.main.async {
+                SumUpSDK.presentLogin(from: self.bridge.viewController, animated: true, completionBlock: nil)
+            }
+            call.success([
+                "code": 0, "message": "Login"
+            ])
         }
-
-        call.success([
-            "code": 1, "message": "Login"
-        ])
     }
 
     @objc func checkout(_ call: CAPPluginCall) {
